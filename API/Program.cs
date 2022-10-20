@@ -1,6 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Persistence;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Text;
+using Infrastructure.Repositories.Interfaces;
+using Infrastructure.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
+
 
 // Add services to the container.
 
@@ -10,6 +17,25 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ShopDbContext>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("shop")));
 
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+//JWT Authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = builder.Configuration["Tokens:Issuer"],
+                        ValidAudience = builder.Configuration["Tokens:Issuer"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Tokens:Key"])),
+                        ClockSkew = TimeSpan.Zero,
+                    };
+                });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -18,6 +44,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseStaticFiles();
+
+app.UseAuthentication();
+
+app.MapGet("/", () => "Hello World!");
 
 app.UseHttpsRedirection();
 
