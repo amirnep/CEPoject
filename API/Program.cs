@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Infrastructure.Repositories.Interfaces;
+using Domain.Models.Entities.Email;
 using Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,7 +18,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ShopDbContext>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("shop")));
 
+//Email
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+
+//Repositories and Interfaces
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IMailService, EmailService>();
 
 //JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

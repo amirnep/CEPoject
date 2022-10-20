@@ -8,6 +8,7 @@ using Persistence;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Transactions;
+using System.Net.Http.Json;
 
 namespace API.Controllers
 {
@@ -88,10 +89,10 @@ namespace API.Controllers
                 Phone = completeProfile.Phone
             };
 
-            if (userObj.Images != null)
+            if (userObj.Image != null)
             {
                 var filestream = new FileStream(filepath, FileMode.Create);
-                user.Images.CopyTo(filestream);
+                user.Image.CopyTo(filestream);
             }
             userObj.ImageUrl = filepath.Remove(0, 7);
             _context.SaveChanges();

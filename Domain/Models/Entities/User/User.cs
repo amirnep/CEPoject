@@ -37,7 +37,7 @@ namespace Domain.Models.Entities.User
         public string? Email { get; set; }
 
         [NotMapped]
-        public IFormFile? Images { get; set; }
+        public IFormFile? Image { get; set; }
 
         public string? ImageUrl { get; set; }
 
