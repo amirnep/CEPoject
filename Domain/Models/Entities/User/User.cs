@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Domain.Entities.Commons;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Models.Entities.User
 {
-    public class User
+    public class User:BaseEntity
     {
         //Cascade On Delete...
         //public User()
@@ -51,5 +52,7 @@ namespace Domain.Models.Entities.User
         [Required(ErrorMessage = "Enter Your Password Confirm.")]
         [Compare("Password", ErrorMessage = "Passwords does not match.")]
         public string? ConfirmPassword { get; set; }
+
+        public ICollection<Cart.Cart> Cart { get; set; }
     }
 }

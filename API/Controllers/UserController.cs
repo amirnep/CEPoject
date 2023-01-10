@@ -9,6 +9,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Transactions;
 using System.Net.Http.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -28,22 +29,6 @@ namespace API.Controllers
             _auth = new AuthService(configuration);
         }
 
-        [Authorize(Roles = "Admin")]
-        [HttpGet]
-        public IActionResult GetUsers()
-        {
-            var users = _repository.GetUsers();
-            return Ok(users);
-        }
-
-        [Authorize(Roles = "Admin")]
-        [HttpGet("{id}", Name = "Get")]
-        public IActionResult GetUser(int id)
-        {
-            var user = _repository.GetUser(id);
-            return new OkObjectResult(user);
-        }
-
         [HttpPost]
         public IActionResult SignUp([FromForm] User user)
         {
@@ -52,51 +37,39 @@ namespace API.Controllers
             {
                 return BadRequest("User with same email already exists");
             }
+
+            //Get Last ID In Table Records
+            var id = _context.Users
+                             .OrderByDescending(x => x.ID)
+                             .Take(1)
+                             .Select(x => x.ID)
+                             .ToList()
+                             .FirstOrDefault();
+
+            string File = Convert.ToString(id+1);
+
+            string uniqueFileName = Guid.NewGuid().ToString() + "_" + File;
+
+            var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/UserImages/", File + ".jpg");
+
             var userObj = new User()
             {
-                FName = null,
-                LName = null,
-                Address = null,
-                Phone = null,
+                FName = user.FName,
+                LName = user.LName,
+                Address = user.Address,
+                Phone = user.Phone,
                 Email = user.Email,
                 Role = "User",
                 Password = SecurePasswordHasherHelper.Hash(user.Password),
                 ConfirmPassword = SecurePasswordHasherHelper.Hash(user.Password),
             };
+
+            user.Image.CopyTo(new FileStream(imagePath, FileMode.Create));
+
+            userObj.ImageUrl = imagePath.Remove(0, 7);
             _context.Users.Add(userObj);
             _context.SaveChanges();
             return StatusCode(StatusCodes.Status201Created);
-        }
-
-        [HttpPut]
-        [Authorize]
-        public IActionResult CompleteProfile([FromForm] CompleteProfileModel completeProfile)
-        {
-            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
-            var user = _context.Users.FirstOrDefault(u => u.Email == userEmail);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            var guid = Guid.NewGuid();
-            var filepath = Path.Combine("wwwroot", guid + ".jpg");
-            var userObj = new User()
-            {
-                FName = completeProfile.FName,
-                LName = completeProfile.LName,
-                Address = completeProfile.Address,
-                Phone = completeProfile.Phone
-            };
-
-            if (userObj.Image != null)
-            {
-                var filestream = new FileStream(filepath, FileMode.Create);
-                user.Image.CopyTo(filestream);
-            }
-            userObj.ImageUrl = filepath.Remove(0, 7);
-            _context.SaveChanges();
-            return Ok("Your Profile Updated.");
         }
 
         [HttpPut]
@@ -114,22 +87,22 @@ namespace API.Controllers
                 return Unauthorized("Sorry you can't change the password");
             }
             user.Password = SecurePasswordHasherHelper.Hash(changePass.NewPassword);
+            user.UpdateTime = DateTime.Now;
             _context.SaveChanges();
             return Ok("Your password has been changed");
-        }
-
-        [Authorize(Roles = "Admin")]
-        [HttpDelete("{id}")]
-        public IActionResult DeleteUser(int id)
-        {
-            _repository.DeleteUser(id);
-            return new OkResult();
         }
 
         [HttpPost]
         public IActionResult Login([FromBody] Login objUser)
         {
             var userEmail = _context.Users.FirstOrDefault(u => u.Email == objUser.Email);
+            var email = objUser.Email;
+            var remove = _context.Users.Where(u => u.Email == email).Select(r => r.IsRemoved).FirstOrDefault();
+            if (remove == true)
+            {
+                return NotFound("User Removed By Admin.");
+            }
+            
             if (userEmail == null)
             {
                 return NotFound();
@@ -138,6 +111,7 @@ namespace API.Controllers
             {
                 return Unauthorized();
             }
+            
 
             var claims = new[]
             {
@@ -168,29 +142,39 @@ namespace API.Controllers
                 return NotFound();
             }
             user.Phone = changePhoneNum.Phone;
+            user.UpdateTime = DateTime.Now;
             _context.SaveChanges();
             return Ok("Your Phone Number updated");
         }
 
-        [HttpPut("{id}")]
+        [HttpPost]
         [Authorize]
-        public IActionResult EditProfile(int id, [FromForm] ChangeProfile imageobj)
+        public IActionResult EditProfile([FromForm] ChangeProfile imageobj)
         {
-            var user = _context.Users.Find(id);
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
+            var user = _context.Users.FirstOrDefault(u => u.Email == userEmail);
             if (user == null)
             {
-                return NotFound("No record found against this Id");
+                return NotFound();
             }
             else
             {
-                var guid = Guid.NewGuid();
-                var filepath = Path.Combine("wwwroot", guid + ".jpg");
-                if (imageobj.Images != null)
-                {
-                    var filestream = new FileStream(filepath, FileMode.Create);
-                    imageobj.Images.CopyTo(filestream);
-                    user.ImageUrl = filepath.Remove(0, 7);
-                }
+                //Get Last ID In Table Records
+                var id = _context.Users.Where(e => e.Email == userEmail).Select(i => i.ID).FirstOrDefault();
+
+                string File = Convert.ToString(id);
+
+                string FileName = File;
+
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + File;
+
+                var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/UserImages/", File + ".jpg");
+
+                imageobj.Images.CopyTo(new FileStream(imagePath, FileMode.Create));
+
+                user.ImageUrl = imagePath.Remove(0, 7);
+
+                user.UpdateTime = DateTime.Now;
                 _context.SaveChanges();
                 return Ok("Record updated successfully");
             }

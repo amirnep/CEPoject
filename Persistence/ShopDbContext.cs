@@ -1,5 +1,10 @@
-﻿using Domain.Models.Entities.User;
+﻿using Domain.Models.Entities;
+using Domain.Models.Entities.Cart;
+using Domain.Models.Entities.Comments;
+using Domain.Models.Entities.Products;
+using Domain.Models.Entities.User;
 using Microsoft.EntityFrameworkCore;
+using Store.Models.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,5 +25,14 @@ namespace Persistence
         }
         public DbSet<User> Users { get; set; } = null!;
 
+        public DbSet<Product> Products { get; set; }
+
+        public DbSet<ProductsGallery> ProductsGalleries { get; set; }
+
+        public DbSet<OtherColors> OtherColors { get; set; }
+
+        public DbSet<Cart> Carts { get; set; }
+
+        public DbSet<Comment> Comments { get; set; }
     }
 }

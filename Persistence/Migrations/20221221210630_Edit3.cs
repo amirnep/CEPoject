@@ -4,7 +4,7 @@
 
 namespace Persistence.Migrations
 {
-    public partial class Edit : Migration
+    public partial class Edit3 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

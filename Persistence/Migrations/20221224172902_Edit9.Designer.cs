@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence;
 
@@ -11,9 +12,10 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(ShopDbContext))]
-    partial class ShopDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221224172902_Edit9")]
+    partial class Edit9
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,97 +23,6 @@ namespace Persistence.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
-
-            modelBuilder.Entity("Domain.Models.Entities.Cart.Cart", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
-
-                    b.Property<string>("DisCount")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("Fee")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("InsertTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsRemoved")
-                        .HasColumnType("bit");
-
-                    b.Property<long>("Mount")
-                        .HasColumnType("bigint");
-
-                    b.Property<bool>("Paid")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("ProductID")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("RemoveTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("UpdateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("ProductID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("Carts");
-                });
-
-            modelBuilder.Entity("Domain.Models.Entities.Comments.Comment", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
-
-                    b.Property<bool>("Confirm")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("InsertTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsRemoved")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("ProductID")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("RemoveTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("UpdateTime")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("ProductID");
-
-                    b.ToTable("Comments");
-                });
 
             modelBuilder.Entity("Domain.Models.Entities.Products.Product", b =>
                 {
@@ -143,13 +54,6 @@ namespace Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DiscountNum")
-                        .HasColumnType("int");
-
-                    b.Property<string>("DiscountText")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Graphic")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -170,8 +74,9 @@ namespace Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<long>("Price")
-                        .HasColumnType("bigint");
+                    b.Property<string>("Price")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ProductCode")
                         .IsRequired()
@@ -332,36 +237,6 @@ namespace Persistence.Migrations
                     b.ToTable("ProductsGalleries");
                 });
 
-            modelBuilder.Entity("Domain.Models.Entities.Cart.Cart", b =>
-                {
-                    b.HasOne("Domain.Models.Entities.Products.Product", "product")
-                        .WithMany("Cart")
-                        .HasForeignKey("ProductID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Models.Entities.User.User", "user")
-                        .WithMany("Cart")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("product");
-
-                    b.Navigation("user");
-                });
-
-            modelBuilder.Entity("Domain.Models.Entities.Comments.Comment", b =>
-                {
-                    b.HasOne("Domain.Models.Entities.Products.Product", "Product")
-                        .WithMany("Comment")
-                        .HasForeignKey("ProductID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("Store.Models.Entities.OtherColors", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Products.Product", "Product")
@@ -386,18 +261,9 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.Models.Entities.Products.Product", b =>
                 {
-                    b.Navigation("Cart");
-
-                    b.Navigation("Comment");
-
                     b.Navigation("OtherColors");
 
                     b.Navigation("ProductsGallery");
-                });
-
-            modelBuilder.Entity("Domain.Models.Entities.User.User", b =>
-                {
-                    b.Navigation("Cart");
                 });
 #pragma warning restore 612, 618
         }
