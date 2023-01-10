@@ -1,4 +1,5 @@
 ﻿using Domain.Models.Entities.Cart;
+using Domain.Models.Entities.Comments;
 using Domain.Models.Entities.Products;
 using Domain.Models.Entities.User;
 using Infrastructure.Repositories.Interfaces;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Persistence;
 using Store.Models.Entities;
+using System.Security.Claims;
 
 namespace API.Areas.Admin.Controllers
 {
@@ -401,6 +403,21 @@ namespace API.Areas.Admin.Controllers
             _context.SaveChanges();
             return Ok("Cart Remove.");
         }
+
+        //RemoveComment
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{id}")]
+        public IActionResult RemoveComment(int id)
+        {
+            var comment = _context.Comments.Find(id);
+
+            comment.IsRemoved = true;
+            comment.UpdateTime = DateTime.Now;
+            comment.RemoveTime = DateTime.Now;
+
+            _context.SaveChanges();
+            return Ok("Comment Remove.");
+        }
         //------------------------------------------------Cart Actions---------------------------------------------------
 
         //Get Cart Details
@@ -488,6 +505,39 @@ namespace API.Areas.Admin.Controllers
         {
             var discount = _context.Products.Where(d => d.ID == id).Where(d => d.IsRemoved == false).Select(d => d.DiscountText).FirstOrDefault();
             return Ok(discount);
+        }
+
+        //---------------------------------------------------Comment Actions-------------------------------------------------------------------------
+        //DeleteComment
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
+        public IActionResult DeleteComment(int id)
+        {
+            var comment = _context.Comments.Find(id);
+            if (comment == null)
+            {
+                return NotFound("No record found against this Id");
+            }
+            else
+            {
+                _context.Comments.Remove(comment);
+                _context.SaveChanges();
+                return Ok("Comment Deleted Successfully.");
+            }
+        }
+
+        //ConfirmComment
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{id}")]
+        public IActionResult ConfirmComment(int id)
+        {
+            var comment = _context.Comments.Find(id);
+
+            comment.UpdateTime = DateTime.Now;
+            comment.Confirm = true;
+
+            _context.SaveChanges();
+            return Ok("Comment Confirmed.");
         }
     }
 }
