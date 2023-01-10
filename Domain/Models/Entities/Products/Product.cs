@@ -92,7 +92,7 @@ namespace Domain.Models.Entities.Products
         [Required(ErrorMessage = "Enter Content.")]
         public string? Content { get; set; }
 
-        public string DiscountText { get; set; }
+        public string? DiscountText { get; set; }
 
         public int DiscountNum { get; set; }
 

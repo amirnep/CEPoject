@@ -53,6 +53,6 @@ namespace Domain.Models.Entities.User
         [Compare("Password", ErrorMessage = "Passwords does not match.")]
         public string? ConfirmPassword { get; set; }
 
-        public ICollection<Cart.Cart> Cart { get; set; }
+        public ICollection<Cart.Cart>? Cart { get; set; }
     }
 }

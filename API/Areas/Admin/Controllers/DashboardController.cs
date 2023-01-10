@@ -494,7 +494,11 @@ namespace API.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult GetDiscounts()
         {
-            var discount = _context.Products.Where(d => d.IsRemoved == false).Select(d => d.DiscountText).ToList();
+            var discount = from d in _context.Products
+                           where d.IsRemoved == false
+                           where d.DiscountText != null
+
+                           select new { DiscountText = d.DiscountText, DiscountNum = d.DiscountNum };
             return Ok(discount);
         }
 
@@ -503,7 +507,12 @@ namespace API.Areas.Admin.Controllers
         [HttpGet("{id}")]
         public IActionResult GetDiscount(int id)
         {
-            var discount = _context.Products.Where(d => d.ID == id).Where(d => d.IsRemoved == false).Select(d => d.DiscountText).FirstOrDefault();
+            var discount = from d in _context.Products
+                           where d.ID == id
+                           where d.IsRemoved == false
+
+                           select new { DiscountText = d.DiscountText, DiscountNum = d.DiscountNum };
+            //var discount = _context.Products.Where(d => d.ID == id).Where(d => d.IsRemoved == false).Select(d => d.DiscountText).FirstOrDefault();
             return Ok(discount);
         }
 
