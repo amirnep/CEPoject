@@ -54,6 +54,7 @@ namespace API.Controllers
 
             var userObj = new User()
             {
+                UserName = user.UserName,
                 FName = user.FName,
                 LName = user.LName,
                 Address = user.Address,

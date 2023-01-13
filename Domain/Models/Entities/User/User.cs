@@ -21,6 +21,9 @@ namespace Domain.Models.Entities.User
         [Column(TypeName = "int")]
         public int ID { get; set; }
 
+        [Required(ErrorMessage = "Enter Your UserName.")]
+        public string? UserName { get; set; }
+
         [Column(TypeName = "nvarchar(20)")]
         public string? FName { get; set; }
 

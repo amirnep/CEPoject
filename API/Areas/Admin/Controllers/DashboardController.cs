@@ -1,10 +1,13 @@
-﻿using Domain.Models.Entities.Cart;
+﻿using AuthenticationPlugin;
+using Domain.Models.Entities.Cart;
 using Domain.Models.Entities.Comments;
 using Domain.Models.Entities.Products;
+using Domain.Models.Entities.ResetPassword;
 using Domain.Models.Entities.User;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Persistence;
 using Store.Models.Entities;
@@ -547,6 +550,25 @@ namespace API.Areas.Admin.Controllers
 
             _context.SaveChanges();
             return Ok("Comment Confirmed.");
+        }
+
+        //--------------------------------------------------------ResetPassword Actions--------------------------------------------
+        //ResetPassword
+        [HttpPut]
+        public IActionResult ResetPassword([FromForm] ResetPassword resetPassword)
+        {
+            var user = _context.Users.Where(u => u.UserName == resetPassword.UserName).FirstOrDefault();
+            if(user == null || user.IsRemoved == true)
+            {
+                return NotFound("User Not Found.");
+            }
+
+            user.Password = SecurePasswordHasherHelper.Hash(resetPassword.NewPassword);
+            user.ConfirmPassword = SecurePasswordHasherHelper.Hash(resetPassword.ConfirmNewPassword);
+            user.UpdateTime = DateTime.Now;
+
+            _context.SaveChanges();
+            return Ok("Password Changed.");
         }
     }
 }

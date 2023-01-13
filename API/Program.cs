@@ -8,6 +8,8 @@ using Domain.Models.Entities.Email;
 using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Identity;
+using Domain.Models.Entities.User;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -74,6 +76,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                         ClockSkew = TimeSpan.Zero,
                     };
                 });
+
+//ResetPasswordSetting
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromHours(2);
+});
 
 //For Routing Areas
 builder.Services.AddMvc(options => options.EnableEndpointRouting = true);
