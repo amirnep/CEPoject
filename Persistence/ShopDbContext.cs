@@ -1,6 +1,7 @@
 ﻿using Domain.Models.Entities;
 using Domain.Models.Entities.Cart;
 using Domain.Models.Entities.Comments;
+using Domain.Models.Entities.Factor;
 using Domain.Models.Entities.Products;
 using Domain.Models.Entities.User;
 using Microsoft.EntityFrameworkCore;
@@ -34,5 +35,9 @@ namespace Persistence
         public DbSet<Cart> Carts { get; set; }
 
         public DbSet<Comment> Comments { get; set; }
+
+        public DbSet<FactorHeader> FactorHeaders { get; set; }
+
+        public DbSet<FactorSub> FactorSubs { get; set; }
     }
 }

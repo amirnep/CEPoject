@@ -1,6 +1,7 @@
 ﻿using AuthenticationPlugin;
 using Domain.Models.Entities.Cart;
 using Domain.Models.Entities.Comments;
+using Domain.Models.Entities.Factor;
 using Domain.Models.Entities.Products;
 using Domain.Models.Entities.ResetPassword;
 using Domain.Models.Entities.User;
@@ -421,6 +422,25 @@ namespace API.Areas.Admin.Controllers
             _context.SaveChanges();
             return Ok("Comment Remove.");
         }
+
+        //RemoveFactor
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{id}")]
+        public IActionResult RemoveFactor(int id)
+        {
+            var factorhd = _context.FactorHeaders.Find(id);
+            factorhd.IsRemoved = true;
+            factorhd.UpdateTime = DateTime.Now;
+            factorhd.RemoveTime = DateTime.Now;
+
+            _context.FactorSubs.Where(f => f.FactorHeaderID == id).ToList().ForEach(a => a.IsRemoved = true);
+            _context.FactorSubs.Where(f => f.FactorHeaderID == id).ToList().ForEach(a => a.UpdateTime = DateTime.Now);
+            _context.FactorSubs.Where(f => f.FactorHeaderID == id).ToList().ForEach(a => a.RemoveTime = DateTime.Now);
+
+            _context.SaveChanges();
+            return Ok("Factor Remove.");
+        }
+
         //------------------------------------------------Cart Actions---------------------------------------------------
 
         //Get Cart Details
@@ -569,6 +589,143 @@ namespace API.Areas.Admin.Controllers
 
             _context.SaveChanges();
             return Ok("Password Changed.");
+        }
+
+        //-------------------------------------------------------Buy Factor Actions-------------------------------------------------
+        //PostFactorHeader
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public IActionResult AddFactorHeader([FromForm] FactorHeader factorHeader)
+        {
+            var id = _context.FactorHeaders
+                             .OrderByDescending(x => x.ID)
+                             .Take(1)
+                             .Select(x => x.ID)
+                             .ToList()
+                             .FirstOrDefault();
+
+            var factorobj = new FactorHeader()
+            {
+                Date = factorHeader.Date,
+                DateTime = DateTime.Now,
+                FactorNumber = id + 1,
+                Description = factorHeader.Description
+            };
+
+            _context.FactorHeaders.Add(factorobj);
+            _context.SaveChanges();
+            return StatusCode(StatusCodes.Status201Created);
+        }
+
+        //DeleteFactorHeader
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
+        public IActionResult DeleteFactor(int id)
+        {
+            var header = _context.FactorHeaders.Find(id);
+            _context.FactorHeaders.Remove(header);
+            _context.SaveChanges();
+            return Ok("Factor Deleted.");
+        }
+
+        //GetFactor
+        [Authorize(Roles = "Admin")]
+        [HttpGet("{id}")]
+        public IActionResult GetFactor(int id)
+        {
+            var factor = from fh in _context.FactorHeaders
+                         join fs in _context.FactorSubs
+                         on fh.ID equals fs.FactorHeaderID
+
+                         join p in _context.Products
+                         on fs.ProductID equals p.ID
+
+                         where fh.ID == id
+                         where fh.IsRemoved == false
+
+                         select new
+                         {
+                             Date = fh.Date,
+                             DateTime = fh.DateTime,
+                             FactorNumber = fh.FactorNumber,
+                             FactorDescription = fh.Description,
+
+                             Fee = fs.Fee,
+                             Mount = fs.Mount,
+                             Discount = fs.DisCount,
+
+                             ProductName = p.ProductName,
+                             Quantity = p.Quantity,
+                             Price = p.Price,
+                             PrductDescription = p.Description,
+
+                             TotalPrice = fs.TotalPrice
+                         };
+
+            return Ok(factor);
+        }
+
+        //GetFactors
+        //GetFactor
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public IActionResult GetFactors()
+        {
+            var factor = from fh in _context.FactorHeaders
+                         join fs in _context.FactorSubs
+                         on fh.ID equals fs.FactorHeaderID
+
+                         join p in _context.Products
+                         on fs.ProductID equals p.ID
+
+                         where fh.IsRemoved == false
+
+                         select new
+                         {
+                             Date = fh.Date,
+                             DateTime = fh.DateTime,
+                             FactorNumber = fh.FactorNumber,
+                             FactorDescription = fh.Description,
+
+                             Fee = fs.Fee,
+                             Mount = fs.Mount,
+                             Discount = fs.DisCount,
+
+                             ProductName = p.ProductName,
+                             Quantity = p.Quantity,
+                             Price = p.Price,
+                             PrductDescription = p.Description,
+
+                             TotalPrice = fs.TotalPrice
+                         };
+
+            return Ok(factor);
+        }
+
+        //PostFactorSub
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public IActionResult AddFactorSub([FromForm] FactorSub factorSub)
+        {
+            var id = _context.FactorHeaders
+                             .OrderByDescending(x => x.ID)
+                             .Take(1)
+                             .Select(x => x.ID)
+                             .ToList()
+                             .FirstOrDefault();
+
+            var factorobj = new FactorSub()
+            {
+                FactorHeaderID = id,
+                ProductID = factorSub.ProductID,
+                Fee = factorSub.Fee,
+                Mount = factorSub.Mount,
+                DisCount = factorSub.DisCount
+            };
+
+            _context.FactorSubs.Add(factorobj);
+            _context.SaveChanges();
+            return StatusCode(StatusCodes.Status201Created);
         }
     }
 }

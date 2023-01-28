@@ -84,24 +84,5 @@ namespace API.Controllers
             var gallery = _context.ProductsGalleries.Where(c => c.ProductID == Convert.ToInt32(product[0])).Select(c => c.ImageUrl).ToList();
             return Ok(gallery);
         }
-
-        /*//Colors
-        [HttpGet]
-        public IActionResult GetColor(string color)
-        {
-            var col = _context.OtherColors.Where(c => c.Color == color).Select(s => s.ProductID).ToList();
-
-            int length_col = col.Count;
-            List<string> productsId = new List<string>(length_col);
-
-            for(int i = 0; i <= length_col; i++)
-            {
-                var product = _context.Products.Where(p => p.ID == Convert.ToInt32(col[i])).Select(c => c.ProductName);
-                return Ok(product);
-                //productsId.Add(Convert.ToString(product));
-            }
-            return Ok();
-            //return Ok(productsId);
-        }*/
     }
 }

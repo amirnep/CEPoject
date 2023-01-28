@@ -1,6 +1,7 @@
 ﻿using Domain.Entities.Commons;
 using Domain.Models.Entities.Cart;
 using Domain.Models.Entities.Comments;
+using Domain.Models.Entities.Factor;
 using Microsoft.AspNetCore.Http;
 using Store.Models.Entities;
 using System;
@@ -100,5 +101,6 @@ namespace Domain.Models.Entities.Products
         public ICollection<OtherColors> OtherColors { get; set; }
         public ICollection<Cart.Cart> Cart { get; set; }
         public ICollection<Comment> Comment { get; set; }
+        public ICollection<FactorSub> FactorSub { get; set; }
     }
 }
