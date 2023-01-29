@@ -23,13 +23,15 @@ namespace Domain.Models.Entities.Factor
 
         [DataType(DataType.Currency)]
         [Required(ErrorMessage = "Enter Correct Fee.")]
-        public long Fee { get; set; }
+        public double Fee { get; set; }
 
         [Required(ErrorMessage = "Enter Mount.")]
-        public long Mount { get; set; }
+        public double Mount { get; set; }
 
-        public int DisCount { get; set; }
+        public double DisCount { get; set; }
 
-        public long TotalPrice => ((Fee * (DisCount / 100)) * Mount);
+        public double Price => (Fee * (DisCount / 100));
+
+        public double TotalPrice => ((Fee - Price) * Mount);
     }
 }

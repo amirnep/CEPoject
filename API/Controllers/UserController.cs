@@ -10,6 +10,7 @@ using System.Security.Claims;
 using System.Transactions;
 using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
+using Domain.Models.Entities.ResetPassword;
 
 namespace API.Controllers
 {
@@ -179,6 +180,24 @@ namespace API.Controllers
                 _context.SaveChanges();
                 return Ok("Record updated successfully");
             }
+        }
+
+        //ResetPassword
+        [HttpPut]
+        public IActionResult ResetPassword([FromForm] ResetPassword resetPassword)
+        {
+            var user = _context.Users.Where(u => u.UserName == resetPassword.UserName).FirstOrDefault();
+            if (user == null || user.IsRemoved == true)
+            {
+                return NotFound("User Not Found.");
+            }
+
+            user.Password = SecurePasswordHasherHelper.Hash(resetPassword.NewPassword);
+            user.ConfirmPassword = SecurePasswordHasherHelper.Hash(resetPassword.ConfirmNewPassword);
+            user.UpdateTime = DateTime.Now;
+
+            _context.SaveChanges();
+            return Ok("Password Changed.");
         }
     }
 }
